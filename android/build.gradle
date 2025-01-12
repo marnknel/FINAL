@@ -1,3 +1,15 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.0.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"
+        // Προσθέστε άλλα απαραίτητα classpath dependencies εδώ, αν υπάρχουν.
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -8,10 +20,10 @@ allprojects {
 rootProject.buildDir = "../build"
 
 subprojects {
-    // Set build directory for each subproject
+    // Ορισμός build directory για κάθε subproject
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 
-    // Ensure the app project is evaluated before others
+    // Βεβαιώσου ότι το app module αξιολογείται πρώτο
     evaluationDependsOn(":app")
 }
 
