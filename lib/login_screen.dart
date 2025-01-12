@@ -1,249 +1,3 @@
-/*import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'library_screen.dart'; // Import the Library Screen
-import 'Forgot Password.dart'; // Import the Forgot Password Screen
-import 'database/db_helper.dart'; // Import the DBHelper class
-
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  bool _isChecked = false; // Variable to track checkbox state
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  // Show error dialog
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Function to attempt login
-  void _attemptLogin() async {
-    String email = _emailController.text;
-    String password = _passwordController.text;
-
-    // Check if the fields are not empty
-    if (email.isEmpty || password.isEmpty) {
-      _showErrorDialog('Please enter both email and password.');
-      return; // Stop further processing if fields are empty
-    }
-
-    // Call validateUser to check credentials
-    final dbHelper = DBHelper();
-    bool isValidUser = await dbHelper.validateUser(email, password);
-
-    if (isValidUser) {
-      // Save the credentials if "Remember Me" is checked
-      if (_isChecked) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('email', email);
-        prefs.setString('password', password);
-      }
-
-      // If valid credentials, navigate to LibraryScreen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LibraryScreen()),
-      );
-    } else {
-      // If invalid credentials, show error and allow retry
-      _showErrorDialog('Email or password is incorrect.');
-    }
-  }
-
-  // Check if credentials are saved in SharedPreferences
-  void _checkSavedCredentials() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedEmail = prefs.getString('email');
-    String? savedPassword = prefs.getString('password');
-
-    if (savedEmail != null && savedPassword != null) {
-      // Set the saved email and password in the text fields
-      _emailController.text = savedEmail;
-      _passwordController.text = savedPassword;
-      setState(() {
-        _isChecked = true; // Keep "Remember me" checkbox checked
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _checkSavedCredentials(); // Check for saved credentials on startup
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Background Image
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/library_background_login.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Title Text - "Shelfcout"
-                const Text(
-                  'SHELFSCOUT!',
-                  style: TextStyle(
-                    fontSize: 40,
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    fontWeight: FontWeight.bold,
-                    fontFamily:
-                        'KaushanScript-Regular', // Custom Font applied here
-                    shadows: [
-                      Shadow(
-                        offset: Offset(2, 2),
-                        blurRadius: 5.0,
-                        color: Colors.black,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                // Email TextField
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    hintText: 'Email',
-                    hintStyle: const TextStyle(
-                        fontFamily: 'KaushanScript-Regular', fontSize: 16),
-                    fillColor: const Color.fromRGBO(255, 224, 178, 1),
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // Password TextField
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true, // Ensuring password is hidden
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    hintStyle: const TextStyle(
-                        fontFamily: 'KaushanScript-Regular', fontSize: 16),
-                    fillColor: const Color.fromRGBO(255, 224, 178, 1),
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Login Button
-                ElevatedButton(
-                  onPressed: _attemptLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                  ),
-                  child: const Text(
-                    "Let's begin!",
-                    style: TextStyle(
-                      fontFamily: 'KaushanScript-Regular',
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // Remember me and Forgot Password in the same line
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Remember me checkbox
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _isChecked, // Use the checkbox state
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _isChecked =
-                                  value ?? false; // Update checkbox state
-                            });
-                          },
-                          activeColor: Colors.white, // White color when checked
-                          checkColor:
-                              Colors.black, // Black color for the checkmark
-                        ),
-                        const Text(
-                          'Remember me',
-                          style: TextStyle(
-                            color: Colors.white, // White text color
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Forgot Password Button
-                    TextButton(
-                      onPressed: () {
-                        // Navigate to Forgot Password Screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const ForgotPasswordScreen()),
-                        );
-                      },
-                      child: const Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white, // White text color
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-*/
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'library_screen.dart'; // Import the Library Screen
@@ -345,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const EdgeInsets.symmetric(vertical: 5),
                             title: Text(_savedAccounts[index]['email']!),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
+                              icon:
+                                  const Icon(Icons.delete, color: Colors.black),
                               onPressed: () {
                                 _confirmDeleteAccount(index);
                               },
@@ -557,16 +312,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: _attemptLogin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(255, 161, 79, 1),
+                    backgroundColor: const Color.fromRGBO(255, 152, 0, 1),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 10),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.0)),
                   ),
                   child: const Text(
-                    'LOGIN',
+                    'LOG IN',
                     style: TextStyle(
-                        fontSize: 18, fontFamily: 'KaushanScript-Regular'),
+                        fontSize: 18,
+                        fontFamily: 'KaushanScript-Regular',
+                        color: Colors.black),
                   ),
                 ),
                 const SizedBox(height: 20),
