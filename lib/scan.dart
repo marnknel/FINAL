@@ -89,7 +89,7 @@ class _ScanPageState extends State<ScanPage> {
 
     try {
       final RecognizedText recognizedText =
-          await textRecognizer.processImage(inputImage);
+      await textRecognizer.processImage(inputImage);
 
       showDialog(
         context: context,
@@ -279,54 +279,30 @@ class _ScanPageState extends State<ScanPage> {
                     padding: const EdgeInsets.only(bottom: 150.0),
                     child: Center(
                       child: _showBox
-                          ? Positioned(
-                              top: 100,
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      child: CustomPaint(
-                                        painter: CornerBorderPainter(),
-                                      ),
-                                    ),
-                                    FractionallySizedBox(
-                                      widthFactor: 0.7,
-                                      heightFactor: 0.8,
-                                      alignment: Alignment.center,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          if (_imageFile != null) {
-                                            _processImage(_imageFile!);
-                                          }
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[300],
-                                            borderRadius:
-                                                BorderRadius.circular(15),
-                                          ),
-                                          child: _imageFile != null
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                  child: Image.file(
-                                                    _imageFile!,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                )
-                                              : Container(),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
+                          ? GestureDetector(
+                        onTap: () {
+                          if (_imageFile != null) {
+                            _processImage(_imageFile!);
+                          }
+                        },
+                        child: _imageFile != null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.file(
+                            _imageFile!,
+                            fit: BoxFit.cover,
+                            width: double.infinity, // Full width of the container
+                            height: double.infinity, // Full height of the container
+                          ),
+                        )
+                            : Container(),
+                      )
                           : Container(),
                     ),
                   ),
                 ),
+
+
               ],
             ),
           ),
