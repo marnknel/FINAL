@@ -1,4 +1,4 @@
-# shelfscout
+# Shelfscout
 
 A new Flutter project.
 
